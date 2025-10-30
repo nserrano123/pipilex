@@ -1,0 +1,868 @@
+{
+    "root": {
+        "brief": {
+            "stuff_code": "CRJpB",
+            "stuff_name": "brief",
+            "concept": {
+                "code": "Text",
+                "domain": "native",
+                "description": "A text",
+                "structure_class_name": "TextContent",
+                "refines": null
+            },
+            "content": {
+                "text": "Create me a workflow that first receive an email of a person  and suggest an appointment checking my google calendar in order to create a meet session. It must intect with the person through a voice message in whatsapp and propose three options of dates and times for the appointment"
+            }
+        },
+        "plan_draft": {
+            "stuff_code": "YyyYv",
+            "stuff_name": "plan_draft",
+            "concept": {
+                "code": "PlanDraft",
+                "domain": "builder",
+                "description": "Natural-language pipeline plan text describing sequences, inputs, outputs.",
+                "structure_class_name": "TextContent",
+                "refines": null
+            },
+            "content": {
+                "text": "# Pipeline Plan\n\n## Initial Inputs\n- person_email\n- google_calendar_credentials\n\n## Pipeline Structure\n\n### SEQUENCE\n\n**Pipe 1: LLM - fetch_available_slots**\n- Generates a request to check Google Calendar for available time slots over the next week\n- Inputs: google_calendar_credentials\n- Output: calendar_query_parameters (structured)\n\n**Pipe 2: LLM - get_calendar_availability**\n- Retrieves available time slots from Google Calendar\n- Inputs: google_calendar_credentials, calendar_query_parameters\n- Output: available_time_slots (structured list)\n\n**Pipe 3: LLM - select_three_options**\n- Selects three optimal appointment time slots from available slots\n- Inputs: available_time_slots\n- Output: proposed_appointment_options (structured list of three options)\n\n**Pipe 4: LLM - generate_appointment_message**\n- Creates a friendly message proposing the three appointment options\n- Inputs: person_email, proposed_appointment_options\n- Output: appointment_message_text\n\n**Pipe 5: LLM - generate_voice_script**\n- Converts the appointment message into a natural voice-friendly script\n- Inputs: appointment_message_text, proposed_appointment_options\n- Output: voice_script_text\n\n**Pipe 6: LLM - send_whatsapp_voice_message**\n- Sends the voice message via WhatsApp to the person\n- Inputs: person_email, voice_script_text, proposed_appointment_options\n- Output: whatsapp_message_status (structured)"
+            }
+        },
+        "concept_drafts": {
+            "stuff_code": "TfYTT",
+            "stuff_name": "concept_drafts",
+            "concept": {
+                "code": "ConceptDrafts",
+                "domain": "builder",
+                "description": "Textual draft of the concepts to create.",
+                "structure_class_name": "TextContent",
+                "refines": null
+            },
+            "content": {
+                "text": "### Concept Email\n\nA valid email address identifying a person or entity.\n\nrefines: Text\n\n---\n\n### Concept Credentials\n\nAuthentication information required to access a service or API, typically including tokens, keys, or OAuth data.\n\n**Structure:**\n- service_name\n  - description: The name of the service these credentials are for\n  - type: text\n  - required: true\n- access_token\n  - description: The authentication token or key\n  - type: text\n  - required: true\n- refresh_token\n  - description: Token used to refresh the access token\n  - type: text\n- expiry_date\n  - description: When the credentials expire\n  - type: date\n\n---\n\n### Concept CalendarQueryParameters\n\nParameters defining the criteria for querying calendar availability.\n\n**Structure:**\n- start_date\n  - description: The beginning date for the availability search\n  - type: date\n  - required: true\n- end_date\n  - description: The ending date for the availability search\n  - type: date\n  - required: true\n- time_zone\n  - description: The time zone for the query\n  - type: text\n  - required: true\n- minimum_duration_minutes\n  - description: Minimum duration required for an appointment slot\n  - type: integer\n  - default_value: 30\n\n---\n\n### Concept TimeSlot\n\nA specific period of time available for scheduling.\n\n**Structure:**\n- start_datetime\n  - description: The start date and time of the slot\n  - type: date\n  - required: true\n- end_datetime\n  - description: The end date and time of the slot\n  - type: date\n  - required: true\n- time_zone\n  - description: The time zone of the slot\n  - type: text\n  - required: true\n\n---\n\n### Concept AppointmentOption\n\nA proposed appointment time with formatted details for presentation.\n\n**Structure:**\n- date\n  - description: The date of the proposed appointment\n  - type: date\n  - required: true\n- start_time\n  - description: The start time of the appointment\n  - type: text\n  - required: true\n- end_time\n  - description: The end time of the appointment\n  - type: text\n  - required: true\n- time_zone\n  - description: The time zone for the appointment\n  - type: text\n  - required: true\n- formatted_display\n  - description: Human-readable formatted version of the appointment option\n  - type: text\n\n---\n\n### Concept MessageStatus\n\nThe delivery and processing status of a sent message.\n\n**Structure:**\n- sent\n  - description: Whether the message was successfully sent\n  - type: boolean\n  - required: true\n- timestamp\n  - description: When the message was sent\n  - type: date\n- message_id\n  - description: Unique identifier for the sent message\n  - type: text\n- error_message\n  - description: Error details if the message failed to send\n  - type: text"
+            }
+        },
+        "concept_specs": {
+            "stuff_code": "bK2SQ",
+            "stuff_name": "concept_specs",
+            "concept": {
+                "code": "ConceptSpec",
+                "domain": "concept",
+                "description": "A specification for a concept including its code, description, and a structure draft as plain text.",
+                "structure_class_name": "ConceptSpec",
+                "refines": null
+            },
+            "content": {
+                "items": [
+                    {
+                        "the_concept_code": "Email",
+                        "description": "A valid email address identifying a person or entity.",
+                        "structure": null,
+                        "refines": "Text"
+                    },
+                    {
+                        "the_concept_code": "Credentials",
+                        "description": "Authentication information required to access a service or API, typically including tokens, keys, or OAuth data.",
+                        "structure": {
+                            "service_name": {
+                                "the_field_name": "service_name",
+                                "description": "The name of the service these credentials are for",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "access_token": {
+                                "the_field_name": "access_token",
+                                "description": "The authentication token or key",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "refresh_token": {
+                                "the_field_name": "refresh_token",
+                                "description": "Token used to refresh the access token",
+                                "type": "text",
+                                "required": null,
+                                "default_value": null
+                            },
+                            "expiry_date": {
+                                "the_field_name": "expiry_date",
+                                "description": "When the credentials expire",
+                                "type": "date",
+                                "required": null,
+                                "default_value": null
+                            }
+                        },
+                        "refines": null
+                    },
+                    {
+                        "the_concept_code": "CalendarQueryParameters",
+                        "description": "Parameters defining the criteria for querying calendar availability.",
+                        "structure": {
+                            "start_date": {
+                                "the_field_name": "start_date",
+                                "description": "The beginning date for the availability search",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "end_date": {
+                                "the_field_name": "end_date",
+                                "description": "The ending date for the availability search",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "time_zone": {
+                                "the_field_name": "time_zone",
+                                "description": "The time zone for the query",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "minimum_duration_minutes": {
+                                "the_field_name": "minimum_duration_minutes",
+                                "description": "Minimum duration required for an appointment slot",
+                                "type": "integer",
+                                "required": null,
+                                "default_value": 30
+                            }
+                        },
+                        "refines": null
+                    },
+                    {
+                        "the_concept_code": "TimeSlot",
+                        "description": "A specific period of time available for scheduling.",
+                        "structure": {
+                            "start_datetime": {
+                                "the_field_name": "start_datetime",
+                                "description": "The start date and time of the slot",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "end_datetime": {
+                                "the_field_name": "end_datetime",
+                                "description": "The end date and time of the slot",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "time_zone": {
+                                "the_field_name": "time_zone",
+                                "description": "The time zone of the slot",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            }
+                        },
+                        "refines": null
+                    },
+                    {
+                        "the_concept_code": "AppointmentOption",
+                        "description": "A proposed appointment time with formatted details for presentation.",
+                        "structure": {
+                            "date": {
+                                "the_field_name": "date",
+                                "description": "The date of the proposed appointment",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "start_time": {
+                                "the_field_name": "start_time",
+                                "description": "The start time of the appointment",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "end_time": {
+                                "the_field_name": "end_time",
+                                "description": "The end time of the appointment",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "time_zone": {
+                                "the_field_name": "time_zone",
+                                "description": "The time zone for the appointment",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "formatted_display": {
+                                "the_field_name": "formatted_display",
+                                "description": "Human-readable formatted version of the appointment option",
+                                "type": "text",
+                                "required": null,
+                                "default_value": null
+                            }
+                        },
+                        "refines": null
+                    },
+                    {
+                        "the_concept_code": "MessageStatus",
+                        "description": "The delivery and processing status of a sent message.",
+                        "structure": {
+                            "sent": {
+                                "the_field_name": "sent",
+                                "description": "Whether the message was successfully sent",
+                                "type": "boolean",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "timestamp": {
+                                "the_field_name": "timestamp",
+                                "description": "When the message was sent",
+                                "type": "date",
+                                "required": null,
+                                "default_value": null
+                            },
+                            "message_id": {
+                                "the_field_name": "message_id",
+                                "description": "Unique identifier for the sent message",
+                                "type": "text",
+                                "required": null,
+                                "default_value": null
+                            },
+                            "error_message": {
+                                "the_field_name": "error_message",
+                                "description": "Error details if the message failed to send",
+                                "type": "text",
+                                "required": null,
+                                "default_value": null
+                            }
+                        },
+                        "refines": null
+                    }
+                ]
+            }
+        },
+        "flow_draft": {
+            "stuff_code": "FrtWr",
+            "stuff_name": "flow_draft",
+            "concept": {
+                "code": "FlowDraft",
+                "domain": "builder",
+                "description": "Draft of the flow of the pipeline.",
+                "structure_class_name": "TextContent",
+                "refines": null
+            },
+            "content": {
+                "text": "# Structured Pipeline Flow\n\n## Pipeline Initial Inputs\n- `person_email` (Email)\n- `google_calendar_credentials` (Credentials)\n\n---\n\n## Pipe Definitions\n\n### Pipe 1: fetch_available_slots\n```yaml\npipe_code: fetch_available_slots\ntype: PipeLLM\ndescription: Generates query parameters to search Google Calendar for available time slots over the next 7 days\ninputs:\n  google_calendar_credentials: Credentials\nresult: calendar_query_parameters\noutput: CalendarQueryParameters\n```\n\n### Pipe 2: get_calendar_availability\n```yaml\npipe_code: get_calendar_availability\ntype: PipeLLM\ndescription: Retrieves available time slots from Google Calendar based on query parameters\ninputs:\n  google_calendar_credentials: Credentials\n  calendar_query_parameters: CalendarQueryParameters\nresult: available_time_slots\noutput: TimeSlot[]\n```\n\n### Pipe 3: select_three_options\n```yaml\npipe_code: select_three_options\ntype: PipeLLM\ndescription: Selects three optimal appointment time slots from the available slots, well-distributed across different days\ninputs:\n  available_time_slots: TimeSlot[]\nresult: proposed_appointment_options\noutput: AppointmentOption[3]\n```\n\n### Pipe 4: generate_appointment_message\n```yaml\npipe_code: generate_appointment_message\ntype: PipeLLM\ndescription: Creates a friendly, professional message proposing the three appointment options\ninputs:\n  person_email: Email\n  proposed_appointment_options: AppointmentOption[3]\nresult: appointment_message_text\noutput: Text\n```\n\n### Pipe 5: generate_voice_script\n```yaml\npipe_code: generate_voice_script\ntype: PipeLLM\ndescription: Converts the appointment message into a natural, conversational voice-friendly script suitable for WhatsApp voice message\ninputs:\n  appointment_message_text: Text\n  proposed_appointment_options: AppointmentOption[3]\nresult: voice_script_text\noutput: Text\n```\n\n### Pipe 6: send_whatsapp_voice_message\n```yaml\npipe_code: send_whatsapp_voice_message\ntype: PipeLLM\ndescription: Sends the voice message via WhatsApp to the person and returns delivery status\ninputs:\n  person_email: Email\n  voice_script_text: Text\n  proposed_appointment_options: AppointmentOption[3]\nresult: whatsapp_message_status\noutput: MessageStatus\n```\n\n---\n\n## Main Pipeline Controller\n\n### # MAIN PIPE: appointment_scheduling_workflow\n```yaml\npipe_code: appointment_scheduling_workflow\ntype: PipeSequence\ndescription: Complete workflow to check calendar availability and send WhatsApp voice message with three appointment options\ninputs:\n  person_email: Email\n  google_calendar_credentials: Credentials\nresult: whatsapp_message_status\noutput: MessageStatus\n\nsteps:\n  - pipe: fetch_available_slots\n    result: calendar_query_parameters\n  \n  - pipe: get_calendar_availability\n    result: available_time_slots\n  \n  - pipe: select_three_options\n    result: proposed_appointment_options\n  \n  - pipe: generate_appointment_message\n    result: appointment_message_text\n  \n  - pipe: generate_voice_script\n    result: voice_script_text\n  \n  - pipe: send_whatsapp_voice_message\n    result: whatsapp_message_status\n```\n\n---\n\n## Variables Recap\n\n| Variable Name | Description | Concept | Multiplicity | Refines |\n|---------------|-------------|---------|--------------|---------|\n| `person_email` | Email address of the person to schedule with | Email | Single | Text |\n| `google_calendar_credentials` | Google Calendar API authentication | Credentials | Single | - |\n| `calendar_query_parameters` | Search criteria for calendar availability | CalendarQueryParameters | Single | - |\n| `available_time_slots` | List of free time slots from calendar | TimeSlot | Multiple [] | - |\n| `proposed_appointment_options` | Three selected appointment options | AppointmentOption | Exactly [3] | - |\n| `appointment_message_text` | Written message with appointment proposals | Text | Single | - |\n| `voice_script_text` | Voice-optimized script for WhatsApp | Text | Single | - |\n| `whatsapp_message_status` | Delivery status of WhatsApp message | MessageStatus | Single | - |"
+            }
+        },
+        "prepared_flow": {
+            "stuff_code": "Dwna3",
+            "stuff_name": "prepared_flow",
+            "concept": {
+                "code": "FlowDraft",
+                "domain": "builder",
+                "description": "Draft of the flow of the pipeline.",
+                "structure_class_name": "TextContent",
+                "refines": null
+            },
+            "content": {
+                "text": "# Flow Review\n\n## Step-by-Step Narration\n\n1. **fetch_available_slots**: Takes Google Calendar credentials and generates query parameters to search for available time slots over the next 7 days.\n\n2. **get_calendar_availability**: Uses the credentials and query parameters to retrieve actual available time slots from Google Calendar.\n\n3. **select_three_options**: Analyzes the available time slots and selects three optimal, well-distributed appointment options.\n\n4. **generate_appointment_message**: Creates a friendly message proposing the three appointment options, using the person's email and the selected options.\n\n5. **generate_voice_script**: Converts the appointment message into a natural, conversational script suitable for voice delivery via WhatsApp.\n\n6. **send_whatsapp_voice_message**: Sends the voice message via WhatsApp to the person and returns the delivery status.\n\n## Consistency Analysis\n\n**Issues Found:**\n\n1. **Missing WhatsApp credentials**: The flow requires sending a WhatsApp message but doesn't have WhatsApp API credentials as an input to the main pipe. This is a critical missing variable.\n\n2. **Email-to-phone mapping**: The brief mentions sending a WhatsApp voice message, but WhatsApp requires a phone number, not an email. The flow uses `person_email` but needs a way to either:\n   - Accept a phone number directly, or\n   - Have a mechanism to map email to phone number\n\n3. **Input consistency**: The main pipe should require `person_email` (or `person_phone`), `google_calendar_credentials`, AND `whatsapp_credentials` as inputs.\n\n---\n\nThe flow has been checked and fixed:\n\n```\n# Structured Pipeline Flow\n\n## Pipeline Initial Inputs\n- `person_email` (Email)\n- `person_phone` (PhoneNumber)\n- `google_calendar_credentials` (Credentials)\n- `whatsapp_credentials` (Credentials)\n\n---\n\n## Pipe Definitions\n\n### Pipe 1: fetch_available_slots\n```yaml\npipe_code: fetch_available_slots\ntype: PipeLLM\ndescription: Generates query parameters to search Google Calendar for available time slots over the next 7 days\ninputs:\n  google_calendar_credentials: Credentials\nresult: calendar_query_parameters\noutput: CalendarQueryParameters\n```\n\n### Pipe 2: get_calendar_availability\n```yaml\npipe_code: get_calendar_availability\ntype: PipeLLM\ndescription: Retrieves available time slots from Google Calendar based on query parameters\ninputs:\n  google_calendar_credentials: Credentials\n  calendar_query_parameters: CalendarQueryParameters\nresult: available_time_slots\noutput: TimeSlot[]\n```\n\n### Pipe 3: select_three_options\n```yaml\npipe_code: select_three_options\ntype: PipeLLM\ndescription: Selects three optimal appointment time slots from the available slots, well-distributed across different days\ninputs:\n  available_time_slots: TimeSlot[]\nresult: proposed_appointment_options\noutput: AppointmentOption[3]\n```\n\n### Pipe 4: generate_appointment_message\n```yaml\npipe_code: generate_appointment_message\ntype: PipeLLM\ndescription: Creates a friendly, professional message proposing the three appointment options\ninputs:\n  person_email: Email\n  proposed_appointment_options: AppointmentOption[3]\nresult: appointment_message_text\noutput: Text\n```\n\n### Pipe 5: generate_voice_script\n```yaml\npipe_code: generate_voice_script\ntype: PipeLLM\ndescription: Converts the appointment message into a natural, conversational voice-friendly script suitable for WhatsApp voice message\ninputs:\n  appointment_message_text: Text\n  proposed_appointment_options: AppointmentOption[3]\nresult: voice_script_text\noutput: Text\n```\n\n### Pipe 6: send_whatsapp_voice_message\n```yaml\npipe_code: send_whatsapp_voice_message\ntype: PipeLLM\ndescription: Sends the voice message via WhatsApp to the person and returns delivery status\ninputs:\n  person_phone: PhoneNumber\n  voice_script_text: Text\n  proposed_appointment_options: AppointmentOption[3]\n  whatsapp_credentials: Credentials\nresult: whatsapp_message_status\noutput: MessageStatus\n```\n\n---\n\n## Main Pipeline Controller\n\n### # MAIN PIPE: appointment_scheduling_workflow\n```yaml\npipe_code: appointment_scheduling_workflow\ntype: PipeSequence\ndescription: Complete workflow to check calendar availability and send WhatsApp voice message with three appointment options\ninputs:\n  person_email: Email\n  person_phone: PhoneNumber\n  google_calendar_credentials: Credentials\n  whatsapp_credentials: Credentials\nresult: whatsapp_message_status\noutput: MessageStatus\n\nsteps:\n  - pipe: fetch_available_slots\n    result: calendar_query_parameters\n  \n  - pipe: get_calendar_availability\n    result: available_time_slots\n  \n  - pipe: select_three_options\n    result: proposed_appointment_options\n  \n  - pipe: generate_appointment_message\n    result: appointment_message_text\n  \n  - pipe: generate_voice_script\n    result: voice_script_text\n  \n  - pipe: send_whatsapp_voice_message\n    result: whatsapp_message_status\n```\n\n---\n\n## Variables Recap\n\n| Variable Name | Description | Concept | Multiplicity | Refines |\n|---------------|-------------|---------|--------------|---------|\n| `person_email` | Email address of the person to schedule with | Email | Single | Text |\n| `person_phone` | Phone number for WhatsApp contact | PhoneNumber | Single | Text |\n| `google_calendar_credentials` | Google Calendar API authentication | Credentials | Single | - |\n| `whatsapp_credentials` | WhatsApp API authentication | Credentials | Single | - |\n| `calendar_query_parameters` | Search criteria for calendar availability | CalendarQueryParameters | Single | - |\n| `available_time_slots` | List of free time slots from calendar | TimeSlot | Multiple [] | - |\n| `proposed_appointment_options` | Three selected appointment options | AppointmentOption | Exactly [3] | - |\n| `appointment_message_text` | Written message with appointment proposals | Text | Single | - |\n| `voice_script_text` | Voice-optimized script for WhatsApp | Text | Single | - |\n| `whatsapp_message_status` | Delivery status of WhatsApp message | MessageStatus | Single | - |\n```"
+            }
+        },
+        "pipe_signatures": {
+            "stuff_code": "C4jBE",
+            "stuff_name": "pipe_signatures",
+            "concept": {
+                "code": "PipeSignature",
+                "domain": "pipe_design",
+                "description": "A pipe contract which says what the pipe does, not how it does it: code (the pipe code in snake_case), type, description, inputs, output.",
+                "structure_class_name": "PipeSignature",
+                "refines": null
+            },
+            "content": {
+                "items": [
+                    {
+                        "code": "fetch_available_slots",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Generates query parameters to search Google Calendar for available time slots over the next 7 days",
+                        "inputs": {
+                            "google_calendar_credentials": "Credentials"
+                        },
+                        "result": "calendar_query_parameters",
+                        "output": "CalendarQueryParameters",
+                        "pipe_dependencies": []
+                    },
+                    {
+                        "code": "get_calendar_availability",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Retrieves available time slots from Google Calendar based on query parameters",
+                        "inputs": {
+                            "google_calendar_credentials": "Credentials",
+                            "calendar_query_parameters": "CalendarQueryParameters"
+                        },
+                        "result": "available_time_slots",
+                        "output": "TimeSlot[]",
+                        "pipe_dependencies": []
+                    },
+                    {
+                        "code": "select_three_options",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Selects three optimal appointment time slots from the available slots, well-distributed across different days",
+                        "inputs": {
+                            "available_time_slots": "TimeSlot"
+                        },
+                        "result": "proposed_appointment_options",
+                        "output": "AppointmentOption[3]",
+                        "pipe_dependencies": []
+                    },
+                    {
+                        "code": "generate_appointment_message",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Creates a friendly, professional message proposing the three appointment options",
+                        "inputs": {
+                            "person_email": "Email",
+                            "proposed_appointment_options": "AppointmentOption"
+                        },
+                        "result": "appointment_message_text",
+                        "output": "Text",
+                        "pipe_dependencies": []
+                    },
+                    {
+                        "code": "generate_voice_script",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Converts the appointment message into a natural, conversational voice-friendly script suitable for WhatsApp voice message",
+                        "inputs": {
+                            "appointment_message_text": "Text",
+                            "proposed_appointment_options": "AppointmentOption"
+                        },
+                        "result": "voice_script_text",
+                        "output": "Text",
+                        "pipe_dependencies": []
+                    },
+                    {
+                        "code": "send_whatsapp_voice_message",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Sends the voice message via WhatsApp to the person and returns delivery status",
+                        "inputs": {
+                            "person_phone": "PhoneNumber",
+                            "voice_script_text": "Text",
+                            "proposed_appointment_options": "AppointmentOption",
+                            "whatsapp_credentials": "Credentials"
+                        },
+                        "result": "whatsapp_message_status",
+                        "output": "MessageStatus",
+                        "pipe_dependencies": []
+                    },
+                    {
+                        "code": "appointment_scheduling_workflow",
+                        "type": "PipeSequence",
+                        "pipe_category": "PipeController",
+                        "description": "Main workflow that orchestrates the complete appointment scheduling process: checks Google Calendar availability and sends WhatsApp voice message with three appointment options to the person",
+                        "inputs": {
+                            "person_email": "Email",
+                            "person_phone": "PhoneNumber",
+                            "google_calendar_credentials": "Credentials",
+                            "whatsapp_credentials": "Credentials"
+                        },
+                        "result": "whatsapp_message_status",
+                        "output": "MessageStatus",
+                        "pipe_dependencies": [
+                            "fetch_available_slots",
+                            "get_calendar_availability",
+                            "select_three_options",
+                            "generate_appointment_message",
+                            "generate_voice_script",
+                            "send_whatsapp_voice_message"
+                        ]
+                    }
+                ]
+            }
+        },
+        "bundle_header_spec": {
+            "stuff_code": "ZSQwy",
+            "stuff_name": "bundle_header_spec",
+            "concept": {
+                "code": "BundleHeaderSpec",
+                "domain": "builder",
+                "description": "A domain information object.",
+                "structure_class_name": "BundleHeaderSpec",
+                "refines": null
+            },
+            "content": {
+                "domain": "appointment_scheduling",
+                "description": "Automated appointment scheduling via Google Calendar integration and WhatsApp voice messaging",
+                "system_prompt": null,
+                "main_pipe": "appointment_scheduling_workflow"
+            }
+        },
+        "pipe_specs": {
+            "stuff_code": "UqyCx",
+            "stuff_name": "pipe_specs",
+            "concept": {
+                "code": "Anything",
+                "domain": "native",
+                "description": "Anything",
+                "structure_class_name": "AnythingContent",
+                "refines": null
+            },
+            "content": {
+                "items": [
+                    {
+                        "pipe_code": "fetch_available_slots",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Generates query parameters to search Google Calendar for available time slots over the next 7 days",
+                        "inputs": {
+                            "google_calendar_credentials": "Credentials"
+                        },
+                        "output": "CalendarQueryParameters",
+                        "llm_skill": "llm_to_answer_easy_questions",
+                        "system_prompt": "You are generating structured query parameters for a Google Calendar availability search. Output the parameters as a structured CalendarQueryParameters object.",
+                        "prompt": "Generate query parameters to search for available time slots in Google Calendar over the next 7 days.\n\nUse the provided credentials context: @google_calendar_credentials\n\nSet the search to cover the next 7 days from today, and use an appropriate time zone based on the credentials or default to UTC. Set a reasonable minimum duration for appointment slots."
+                    },
+                    {
+                        "pipe_code": "get_calendar_availability",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Retrieves available time slots from Google Calendar based on query parameters",
+                        "inputs": {
+                            "google_calendar_credentials": "Credentials",
+                            "calendar_query_parameters": "CalendarQueryParameters"
+                        },
+                        "output": "TimeSlot[]",
+                        "llm_skill": "llm_to_retrieve",
+                        "system_prompt": "You are a calendar integration assistant that retrieves available time slots from Google Calendar. Your task is to generate structured TimeSlot objects based on the provided credentials and query parameters.",
+                        "prompt": "Using the provided Google Calendar credentials and query parameters, retrieve all available time slots within the specified date range.\n\n@google_calendar_credentials\n\n@calendar_query_parameters\n\nReturn all available time slots that meet the minimum duration requirement."
+                    },
+                    {
+                        "pipe_code": "select_three_options",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Selects three optimal appointment time slots from the available slots, well-distributed across different days",
+                        "inputs": {
+                            "available_time_slots": "TimeSlot[]"
+                        },
+                        "output": "AppointmentOption[3]",
+                        "llm_skill": "llm_to_answer_easy_questions",
+                        "system_prompt": "You are an intelligent scheduling assistant. Your task is to analyze available time slots and select exactly three optimal appointment options that are well-distributed across different days. You will output structured AppointmentOption objects.",
+                        "prompt": "From the available time slots provided below, select exactly three optimal appointment options that are well-distributed across different days to give the recipient good variety and flexibility.\n\n@available_time_slots\n\nChoose slots that:\n- Are spread across different days when possible\n- Offer good time variety (e.g., morning, afternoon, different days)\n- Are convenient and reasonable appointment times\n\nReturn exactly three appointment options."
+                    },
+                    {
+                        "pipe_code": "generate_appointment_message",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Creates a friendly, professional message proposing the three appointment options",
+                        "inputs": {
+                            "person_email": "Email",
+                            "proposed_appointment_options": "AppointmentOption"
+                        },
+                        "output": "Text",
+                        "llm_skill": "llm_for_creative_writing",
+                        "system_prompt": "You are a professional assistant who writes friendly, warm, and concise messages for scheduling appointments. Your tone should be approachable yet professional.",
+                        "prompt": "Create a friendly and professional message to send to $person_email proposing appointment options.\n\n@proposed_appointment_options\n\nThe message should:\n- Be warm and personable\n- Clearly present the three appointment time options\n- Be concise and easy to read\n- Invite the recipient to choose their preferred time or suggest an alternative"
+                    },
+                    {
+                        "pipe_code": "generate_voice_script",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Converts the appointment message into a natural, conversational voice-friendly script suitable for WhatsApp voice message",
+                        "inputs": {
+                            "appointment_message_text": "Text",
+                            "proposed_appointment_options": "AppointmentOption"
+                        },
+                        "output": "Text",
+                        "llm_skill": "llm_for_creative_writing",
+                        "system_prompt": "You are an expert at converting written messages into natural, conversational voice scripts. Create scripts that sound warm, friendly, and natural when spoken aloud in a voice message.",
+                        "prompt": "Convert the following appointment message into a natural, conversational voice script suitable for a WhatsApp voice message.\n\n@appointment_message_text\n\nThe script should:\n- Sound natural and conversational when spoken aloud\n- Be warm and friendly in tone\n- Include natural pauses and transitions\n- Be concise and easy to understand when heard\n- Maintain the key information about the appointment options\n\nGenerate a voice-friendly script that can be directly used for recording."
+                    },
+                    {
+                        "pipe_code": "send_whatsapp_voice_message",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Sends the voice message via WhatsApp to the person and returns delivery status",
+                        "inputs": {
+                            "person_phone": "PhoneNumber",
+                            "voice_script_text": "Text",
+                            "proposed_appointment_options": "AppointmentOption",
+                            "whatsapp_credentials": "Credentials"
+                        },
+                        "output": "MessageStatus",
+                        "llm_skill": "llm_to_answer_easy_questions",
+                        "system_prompt": "You are a WhatsApp messaging assistant. Your task is to send a voice message via WhatsApp and return a structured MessageStatus object with the delivery status.",
+                        "prompt": "Send the following voice script as a WhatsApp voice message to the phone number $person_phone:\n\n@voice_script_text\n\nThe message includes these appointment options:\n@proposed_appointment_options\n\nUse the following WhatsApp credentials to authenticate and send the message:\n@whatsapp_credentials\n\nSend the message and return the delivery status."
+                    },
+                    {
+                        "pipe_code": "appointment_scheduling_workflow",
+                        "type": "PipeSequence",
+                        "pipe_category": "PipeController",
+                        "description": "Main workflow that orchestrates the complete appointment scheduling process: checks Google Calendar availability and sends WhatsApp voice message with three appointment options to the person",
+                        "inputs": {
+                            "person_email": "Email",
+                            "person_phone": "PhoneNumber",
+                            "google_calendar_credentials": "Credentials",
+                            "whatsapp_credentials": "Credentials"
+                        },
+                        "output": "MessageStatus",
+                        "steps": [
+                            {
+                                "pipe_code": "fetch_available_slots",
+                                "result": "calendar_query_parameters"
+                            },
+                            {
+                                "pipe_code": "get_calendar_availability",
+                                "result": "available_time_slots"
+                            },
+                            {
+                                "pipe_code": "select_three_options",
+                                "result": "proposed_appointment_options"
+                            },
+                            {
+                                "pipe_code": "generate_appointment_message",
+                                "result": "appointment_message_text"
+                            },
+                            {
+                                "pipe_code": "generate_voice_script",
+                                "result": "voice_script_text"
+                            },
+                            {
+                                "pipe_code": "send_whatsapp_voice_message",
+                                "result": "whatsapp_message_status"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "pipelex_bundle_spec": {
+            "stuff_code": "j5baS",
+            "stuff_name": "pipelex_bundle_spec",
+            "concept": {
+                "code": "PipelexBundleSpec",
+                "domain": "builder",
+                "description": "A Pipelex bundle spec.",
+                "structure_class_name": "PipelexBundleSpec",
+                "refines": null
+            },
+            "content": {
+                "domain": "appointment_scheduling",
+                "description": "Automated appointment scheduling via Google Calendar integration and WhatsApp voice messaging",
+                "system_prompt": null,
+                "main_pipe": "appointment_scheduling_workflow",
+                "concept": {
+                    "Email": {
+                        "the_concept_code": "Email",
+                        "description": "A valid email address identifying a person or entity.",
+                        "structure": null,
+                        "refines": "Text"
+                    },
+                    "Credentials": {
+                        "the_concept_code": "Credentials",
+                        "description": "Authentication information required to access a service or API, typically including tokens, keys, or OAuth data.",
+                        "structure": {
+                            "service_name": {
+                                "the_field_name": "service_name",
+                                "description": "The name of the service these credentials are for",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "access_token": {
+                                "the_field_name": "access_token",
+                                "description": "The authentication token or key",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "refresh_token": {
+                                "the_field_name": "refresh_token",
+                                "description": "Token used to refresh the access token",
+                                "type": "text",
+                                "required": null,
+                                "default_value": null
+                            },
+                            "expiry_date": {
+                                "the_field_name": "expiry_date",
+                                "description": "When the credentials expire",
+                                "type": "date",
+                                "required": null,
+                                "default_value": null
+                            }
+                        },
+                        "refines": null
+                    },
+                    "CalendarQueryParameters": {
+                        "the_concept_code": "CalendarQueryParameters",
+                        "description": "Parameters defining the criteria for querying calendar availability.",
+                        "structure": {
+                            "start_date": {
+                                "the_field_name": "start_date",
+                                "description": "The beginning date for the availability search",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "end_date": {
+                                "the_field_name": "end_date",
+                                "description": "The ending date for the availability search",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "time_zone": {
+                                "the_field_name": "time_zone",
+                                "description": "The time zone for the query",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "minimum_duration_minutes": {
+                                "the_field_name": "minimum_duration_minutes",
+                                "description": "Minimum duration required for an appointment slot",
+                                "type": "integer",
+                                "required": null,
+                                "default_value": 30
+                            }
+                        },
+                        "refines": null
+                    },
+                    "TimeSlot": {
+                        "the_concept_code": "TimeSlot",
+                        "description": "A specific period of time available for scheduling.",
+                        "structure": {
+                            "start_datetime": {
+                                "the_field_name": "start_datetime",
+                                "description": "The start date and time of the slot",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "end_datetime": {
+                                "the_field_name": "end_datetime",
+                                "description": "The end date and time of the slot",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "time_zone": {
+                                "the_field_name": "time_zone",
+                                "description": "The time zone of the slot",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            }
+                        },
+                        "refines": null
+                    },
+                    "AppointmentOption": {
+                        "the_concept_code": "AppointmentOption",
+                        "description": "A proposed appointment time with formatted details for presentation.",
+                        "structure": {
+                            "date": {
+                                "the_field_name": "date",
+                                "description": "The date of the proposed appointment",
+                                "type": "date",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "start_time": {
+                                "the_field_name": "start_time",
+                                "description": "The start time of the appointment",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "end_time": {
+                                "the_field_name": "end_time",
+                                "description": "The end time of the appointment",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "time_zone": {
+                                "the_field_name": "time_zone",
+                                "description": "The time zone for the appointment",
+                                "type": "text",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "formatted_display": {
+                                "the_field_name": "formatted_display",
+                                "description": "Human-readable formatted version of the appointment option",
+                                "type": "text",
+                                "required": null,
+                                "default_value": null
+                            }
+                        },
+                        "refines": null
+                    },
+                    "MessageStatus": {
+                        "the_concept_code": "MessageStatus",
+                        "description": "The delivery and processing status of a sent message.",
+                        "structure": {
+                            "sent": {
+                                "the_field_name": "sent",
+                                "description": "Whether the message was successfully sent",
+                                "type": "boolean",
+                                "required": true,
+                                "default_value": null
+                            },
+                            "timestamp": {
+                                "the_field_name": "timestamp",
+                                "description": "When the message was sent",
+                                "type": "date",
+                                "required": null,
+                                "default_value": null
+                            },
+                            "message_id": {
+                                "the_field_name": "message_id",
+                                "description": "Unique identifier for the sent message",
+                                "type": "text",
+                                "required": null,
+                                "default_value": null
+                            },
+                            "error_message": {
+                                "the_field_name": "error_message",
+                                "description": "Error details if the message failed to send",
+                                "type": "text",
+                                "required": null,
+                                "default_value": null
+                            }
+                        },
+                        "refines": null
+                    }
+                },
+                "pipe": {
+                    "fetch_available_slots": {
+                        "pipe_code": "fetch_available_slots",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Generates query parameters to search Google Calendar for available time slots over the next 7 days",
+                        "inputs": {
+                            "google_calendar_credentials": "Credentials"
+                        },
+                        "output": "CalendarQueryParameters",
+                        "llm_skill": "llm_to_answer_easy_questions",
+                        "system_prompt": "You are generating structured query parameters for a Google Calendar availability search. Output the parameters as a structured CalendarQueryParameters object.",
+                        "prompt": "Generate query parameters to search for available time slots in Google Calendar over the next 7 days.\n\nUse the provided credentials context: @google_calendar_credentials\n\nSet the search to cover the next 7 days from today, and use an appropriate time zone based on the credentials or default to UTC. Set a reasonable minimum duration for appointment slots."
+                    },
+                    "get_calendar_availability": {
+                        "pipe_code": "get_calendar_availability",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Retrieves available time slots from Google Calendar based on query parameters",
+                        "inputs": {
+                            "google_calendar_credentials": "Credentials",
+                            "calendar_query_parameters": "CalendarQueryParameters"
+                        },
+                        "output": "TimeSlot[]",
+                        "llm_skill": "llm_to_retrieve",
+                        "system_prompt": "You are a calendar integration assistant that retrieves available time slots from Google Calendar. Your task is to generate structured TimeSlot objects based on the provided credentials and query parameters.",
+                        "prompt": "Using the provided Google Calendar credentials and query parameters, retrieve all available time slots within the specified date range.\n\n@google_calendar_credentials\n\n@calendar_query_parameters\n\nReturn all available time slots that meet the minimum duration requirement."
+                    },
+                    "select_three_options": {
+                        "pipe_code": "select_three_options",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Selects three optimal appointment time slots from the available slots, well-distributed across different days",
+                        "inputs": {
+                            "available_time_slots": "TimeSlot[]"
+                        },
+                        "output": "AppointmentOption[3]",
+                        "llm_skill": "llm_to_answer_easy_questions",
+                        "system_prompt": "You are an intelligent scheduling assistant. Your task is to analyze available time slots and select exactly three optimal appointment options that are well-distributed across different days. You will output structured AppointmentOption objects.",
+                        "prompt": "From the available time slots provided below, select exactly three optimal appointment options that are well-distributed across different days to give the recipient good variety and flexibility.\n\n@available_time_slots\n\nChoose slots that:\n- Are spread across different days when possible\n- Offer good time variety (e.g., morning, afternoon, different days)\n- Are convenient and reasonable appointment times\n\nReturn exactly three appointment options."
+                    },
+                    "generate_appointment_message": {
+                        "pipe_code": "generate_appointment_message",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Creates a friendly, professional message proposing the three appointment options",
+                        "inputs": {
+                            "person_email": "Email",
+                            "proposed_appointment_options": "AppointmentOption"
+                        },
+                        "output": "Text",
+                        "llm_skill": "llm_for_creative_writing",
+                        "system_prompt": "You are a professional assistant who writes friendly, warm, and concise messages for scheduling appointments. Your tone should be approachable yet professional.",
+                        "prompt": "Create a friendly and professional message to send to $person_email proposing appointment options.\n\n@proposed_appointment_options\n\nThe message should:\n- Be warm and personable\n- Clearly present the three appointment time options\n- Be concise and easy to read\n- Invite the recipient to choose their preferred time or suggest an alternative"
+                    },
+                    "generate_voice_script": {
+                        "pipe_code": "generate_voice_script",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Converts the appointment message into a natural, conversational voice-friendly script suitable for WhatsApp voice message",
+                        "inputs": {
+                            "appointment_message_text": "Text",
+                            "proposed_appointment_options": "AppointmentOption"
+                        },
+                        "output": "Text",
+                        "llm_skill": "llm_for_creative_writing",
+                        "system_prompt": "You are an expert at converting written messages into natural, conversational voice scripts. Create scripts that sound warm, friendly, and natural when spoken aloud in a voice message.",
+                        "prompt": "Convert the following appointment message into a natural, conversational voice script suitable for a WhatsApp voice message.\n\n@appointment_message_text\n\nThe script should:\n- Sound natural and conversational when spoken aloud\n- Be warm and friendly in tone\n- Include natural pauses and transitions\n- Be concise and easy to understand when heard\n- Maintain the key information about the appointment options\n\nGenerate a voice-friendly script that can be directly used for recording."
+                    },
+                    "send_whatsapp_voice_message": {
+                        "pipe_code": "send_whatsapp_voice_message",
+                        "type": "PipeLLM",
+                        "pipe_category": "PipeOperator",
+                        "description": "Sends the voice message via WhatsApp to the person and returns delivery status",
+                        "inputs": {
+                            "person_phone": "PhoneNumber",
+                            "voice_script_text": "Text",
+                            "proposed_appointment_options": "AppointmentOption",
+                            "whatsapp_credentials": "Credentials"
+                        },
+                        "output": "MessageStatus",
+                        "llm_skill": "llm_to_answer_easy_questions",
+                        "system_prompt": "You are a WhatsApp messaging assistant. Your task is to send a voice message via WhatsApp and return a structured MessageStatus object with the delivery status.",
+                        "prompt": "Send the following voice script as a WhatsApp voice message to the phone number $person_phone:\n\n@voice_script_text\n\nThe message includes these appointment options:\n@proposed_appointment_options\n\nUse the following WhatsApp credentials to authenticate and send the message:\n@whatsapp_credentials\n\nSend the message and return the delivery status."
+                    },
+                    "appointment_scheduling_workflow": {
+                        "pipe_code": "appointment_scheduling_workflow",
+                        "type": "PipeSequence",
+                        "pipe_category": "PipeController",
+                        "description": "Main workflow that orchestrates the complete appointment scheduling process: checks Google Calendar availability and sends WhatsApp voice message with three appointment options to the person",
+                        "inputs": {
+                            "person_email": "Email",
+                            "person_phone": "PhoneNumber",
+                            "google_calendar_credentials": "Credentials",
+                            "whatsapp_credentials": "Credentials"
+                        },
+                        "output": "MessageStatus",
+                        "steps": [
+                            {
+                                "pipe_code": "fetch_available_slots",
+                                "result": "calendar_query_parameters"
+                            },
+                            {
+                                "pipe_code": "get_calendar_availability",
+                                "result": "available_time_slots"
+                            },
+                            {
+                                "pipe_code": "select_three_options",
+                                "result": "proposed_appointment_options"
+                            },
+                            {
+                                "pipe_code": "generate_appointment_message",
+                                "result": "appointment_message_text"
+                            },
+                            {
+                                "pipe_code": "generate_voice_script",
+                                "result": "voice_script_text"
+                            },
+                            {
+                                "pipe_code": "send_whatsapp_voice_message",
+                                "result": "whatsapp_message_status"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "aliases": {
+        "main_stuff": "pipelex_bundle_spec"
+    }
+}

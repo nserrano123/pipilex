@@ -1,0 +1,28 @@
+{
+  "person_email": {
+    "concept": "appointment_scheduling.Email",
+    "content": "person_email_text"
+  },
+  "person_phone": {
+    "concept": "implicit.PhoneNumber",
+    "content": "person_phone_text"
+  },
+  "google_calendar_credentials": {
+    "concept": "appointment_scheduling.Credentials",
+    "content": {
+      "service_name": "service_name_value",
+      "access_token": "access_token_value",
+      "refresh_token": "refresh_token_value",
+      "expiry_date": "expiry_date_value  # TODO: Fill datetime"
+    }
+  },
+  "whatsapp_credentials": {
+    "concept": "appointment_scheduling.Credentials",
+    "content": {
+      "service_name": "whatsapp",
+      "access_token": "access_token_value",
+      "refresh_token": "refresh_token_value",
+      "expiry_date": "expiry_date_value  # TODO: Fill datetime"
+    }
+  }
+}
