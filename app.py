@@ -39,7 +39,15 @@ async def run_with_inputs(inputs_path: Path) -> str:
         inputs=inputs,
     )
 
-    return pipe_output.main_stuff_as_str
+    # Return text if main stuff is Text; otherwise stringify structured content
+    try:
+        return pipe_output.main_stuff_as_str
+    except Exception:
+        content = pipe_output.main_stuff.content
+        to_json = getattr(content, "model_dump_json", None)
+        if callable(to_json):
+            return to_json(indent=2)
+        return str(content)
 
 
 if __name__ == "__main__":
