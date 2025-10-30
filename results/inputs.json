@@ -13,7 +13,7 @@
       "service_name": "service_name_value",
       "access_token": "access_token_value",
       "refresh_token": "refresh_token_value",
-      "expiry_date": "expiry_date_value  # TODO: Fill datetime"
+      "expiry_date": "2025-12-31T00:00:00Z"
     }
   },
   "whatsapp_credentials": {
@@ -22,7 +22,7 @@
       "service_name": "whatsapp",
       "access_token": "access_token_value",
       "refresh_token": "refresh_token_value",
-      "expiry_date": "expiry_date_value  # TODO: Fill datetime"
+      "expiry_date": "2025-12-31T00:00:00Z"
     }
   }
 }
